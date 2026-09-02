@@ -8,10 +8,12 @@ const async = require('async')
 const crypto = require('crypto')
 const DbBase = require('@bitfinex/bfx-facs-db-sqlite')
 const uuidv4 = require('uuid/v4')
+const { cloneDeep, isNil } = require('@bitfinex/lib-js-util-base')
 const { google } = require('googleapis')
 const { UserError } = require('./errors')
 const migrations = require('./migrations')
-const { cloneDeep, isNil } = require('@bitfinex/lib-js-util-base')
+const PrivilegeRepository = require('./src/privilege-repo')
+const AdminPrivilegeRepository = require('./src/admin-privilege-repo')
 
 const FORMS_FIELD = 'forms'
 const JSON_FIELDS = [FORMS_FIELD, 'whitelistedIps']
@@ -233,6 +235,20 @@ class GoogleAuth extends DbBase {
       },
       async () => {
         await this._saveAdminsFromConfig()
+      },
+      cb => {
+        this.privilegeRepo = new PrivilegeRepository(this.db, this.conf)
+        this.runMigrations(
+          [this.privilegeRepo.createTable()],
+          cb
+        )
+      },
+      cb => {
+        this.adminPrivilegeRepo = new AdminPrivilegeRepository(this.db, this.conf)
+        this.runMigrations(
+          [this.adminPrivilegeRepo.createTable()],
+          cb
+        )
       }
     ], cb)
   }
@@ -947,6 +963,64 @@ class GoogleAuth extends DbBase {
   async hasPassword (email) {
     const admin = await this._getAdmin(email)
     return !!admin?.password
+  }
+
+  addPrivilege (name) {
+    return this.privilegeRepo.add({ name })
+  }
+
+  getAllPrivileges () {
+    return this.privilegeRepo.findAll()
+  }
+
+  /**
+   * 
+   * @param {string} emailOrId 
+   * @param {number} privilegeId 
+   * @returns 
+   */
+  addAdminPrivilege (emailOrId, privilegeId) {
+    const admin = await this._getAdminFromDB(emailOrId, true, true)
+    if (!admin) throw new Error('INVALID_ADMIN')
+
+    const privilege = await this.privilegeRepo.findById(privilegeId)
+    if (!privilege) throw new Error('INVALID_PRIVILEGE_ID')
+
+    return this.adminPrivilegeRepo.add({ adminId: admin.id, privilegeId: privilege.id })
+  }
+
+  /**
+   * 
+   * @param {string} emailOrId 
+   * @param {number} privilegeId 
+   * @returns 
+   */
+  async checkAdminHasRequiredPrivilege (emailOrId, privilegeId) {
+    const admin = await this._getAdminFromDB(emailOrId, true, true)
+    if (!admin) throw new Error('INVALID_ADMIN')
+
+    const adminPrivilege = await this.adminPrivilegeRepo.findAdminPrivilege(admin.id, privilegeId)
+    return Boolean(adminPrivilege)
+  }
+
+  async getAdminWithPrivileges (email) {
+    const admin = await this.getAdmin(email)
+    if (!admin) throw new Error('INVALID_ADMIN')
+
+    const privileges = await new Promise((resolve, reject) => {
+      const query = `
+        SELECT p.id, p.name
+        FROM admin_privileges ap
+        JOIN privileges p ON p.id = ap.permission_id
+        WHERE ap.admin_id = ?;
+      `
+      this.db.all(query, [admin.id], function (err, rows) {
+        if (err) return reject(err)
+        return resolve(rows)
+      })
+    })
+
+    return { ...admin, privileges }
   }
 }
 
