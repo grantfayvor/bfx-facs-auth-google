@@ -1,26 +1,18 @@
 'use strict'
 
+const assert = require('assert')
 const BaseRepository = require('./repository')
 
-class PrivilegeRepository extends BaseRepository {
+const tableName = 'privileges'
 
-  tableName = 'privileges'
+class PrivilegeRepository extends BaseRepository {
 
   /**
    * 
    * @param {import('sqlite3').Database} db 
    */
   constructor (db, conf) {
-    super(db, this.tableName, conf)
-  }
-
-  createTable () {
-    return `
-      CREATE TABLE ${this.tableName} (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
-      );
-    `
+    super(db, tableName, conf)
   }
 
   /**

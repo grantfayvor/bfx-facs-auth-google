@@ -1,6 +1,8 @@
 'use strict'
 
 const tableName = 'admin_users'
+const privilegesTable = 'privileges'
+const adminPrivilegeTable = 'admin_privileges'
 
 const migrations = [
   (_this, cb) => {
@@ -79,6 +81,27 @@ const migrations = [
         ADD whitelistedIps TEXT
       `, cb)
     })
+  },
+  (_this, cb) => {
+    _this.db.run(`
+      CREATE TABLE ${privilegesTable} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+      );
+    `, cb)
+  },
+  (_this, cb) => {
+    _this.db.run(`
+      CREATE TABLE ${adminPrivilegeTable} (
+        admin_id INTEGER NOT NULL,
+        privilege_id INTEGER NOT NULL,
+
+        PRIMARY KEY (admin_id, privilege_id),
+
+        FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE,
+        FOREIGN KEY (privilege_id) REFERENCES privileges(id) ON DELETE CASCADE
+      );
+    `, cb)
   }
 ]
 

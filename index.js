@@ -236,20 +236,10 @@ class GoogleAuth extends DbBase {
       async () => {
         await this._saveAdminsFromConfig()
       },
-      cb => {
+      async () => {
         this.privilegeRepo = new PrivilegeRepository(this.db, this.conf)
-        this.runMigrations(
-          [this.privilegeRepo.createTable()],
-          cb
-        )
-      },
-      cb => {
         this.adminPrivilegeRepo = new AdminPrivilegeRepository(this.db, this.conf)
-        this.runMigrations(
-          [this.adminPrivilegeRepo.createTable()],
-          cb
-        )
-      }
+      },
     ], cb)
   }
 
@@ -865,7 +855,7 @@ class GoogleAuth extends DbBase {
    */
   async getAdmin (emailOrId, active = true, id = false) {
     const admin = await this._getAdmin(emailOrId, active, id)
-    const displayKeys = ['email', 'level', 'blockPrivilege', 'company',
+    const displayKeys = ['id', 'email', 'level', 'blockPrivilege', 'company',
       'analyticsPrivilege', 'manageAdminsPrivilege', 'casesPrivilege', 'fetchMotivationsPrivilege', 'readOnly', 'active', 'timestamp', FORMS_FIELD, 'whitelistedIps']
 
     if (this.conf.useDB && admin) {
@@ -979,7 +969,7 @@ class GoogleAuth extends DbBase {
    * @param {number} privilegeId 
    * @returns 
    */
-  addAdminPrivilege (emailOrId, privilegeId) {
+  async assignAdminPrivilege (emailOrId, privilegeId) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
     if (!admin) throw new Error('INVALID_ADMIN')
 
@@ -993,7 +983,7 @@ class GoogleAuth extends DbBase {
    * 
    * @param {string} emailOrId 
    * @param {number} privilegeId 
-   * @returns 
+   * @returns {Boolean}
    */
   async checkAdminHasRequiredPrivilege (emailOrId, privilegeId) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
@@ -1007,18 +997,7 @@ class GoogleAuth extends DbBase {
     const admin = await this.getAdmin(email)
     if (!admin) throw new Error('INVALID_ADMIN')
 
-    const privileges = await new Promise((resolve, reject) => {
-      const query = `
-        SELECT p.id, p.name
-        FROM admin_privileges ap
-        JOIN privileges p ON p.id = ap.permission_id
-        WHERE ap.admin_id = ?;
-      `
-      this.db.all(query, [admin.id], function (err, rows) {
-        if (err) return reject(err)
-        return resolve(rows)
-      })
-    })
+    const privileges = await this.adminPrivilegeRepo.getAdminPrivileges(admin.id)
 
     return { ...admin, privileges }
   }
