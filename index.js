@@ -982,14 +982,14 @@ class GoogleAuth extends DbBase {
   /**
    *
    * @param {string} emailOrId
-   * @param {number} privilegeId
+   * @param {string} privilege
    * @returns {Boolean}
    */
-  async checkAdminHasRequiredPrivilege (emailOrId, privilegeId) {
+  async checkAdminHasRequiredPrivilege (emailOrId, privilege) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
     if (!admin) throw new Error('INVALID_ADMIN')
 
-    const adminPrivilege = await this.adminPrivilegeRepo.findAdminPrivilege(admin.id, privilegeId)
+    const adminPrivilege = await this.adminPrivilegeRepo.findAdminPrivilege(admin.id, privilege)
     return Boolean(adminPrivilege)
   }
 

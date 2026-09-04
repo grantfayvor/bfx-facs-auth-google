@@ -2,16 +2,17 @@
 
 const assert = require('assert')
 const BaseRepository = require('./repository')
-
-const tableName = 'admin_privileges'
+const PrivilegeRepository = require('./privilege-repo')
 
 class AdminPrivilegeRepository extends BaseRepository {
+  static tableName = 'admin_privileges'
+
   /**
    *
    * @param {import('sqlite3').Database} db
    */
   constructor (db, conf) {
-    super(db, tableName, conf)
+    super(db, AdminPrivilegeRepository.tableName, conf)
   }
 
   /**
@@ -30,14 +31,17 @@ class AdminPrivilegeRepository extends BaseRepository {
   /**
    *
    * @param {number} adminId
-   * @param {number} privilegeId
+   * @param {string} privilege
    * @returns {Promise<object>}
    */
-  findAdminPrivilege (adminId, privilegeId) {
+  findAdminPrivilege (adminId, privilege) {
     return new Promise((resolve, reject) => {
       this.db.get(
-        `SELECT * FROM ${this.tableName} WHERE admin_id=? AND privilege_id=?`,
-        [adminId, privilegeId],
+        `SELECT ap.admin_id, ap.privilege_id, p.name as privilege_name
+        FROM ${this.tableName} ap
+        JOIN ${PrivilegeRepository.tableName} p ON p.id = ap.privilege_id
+        WHERE ap.admin_id=? AND p.name=?`,
+        [adminId, privilege],
         function (err, row) {
           if (err) return reject(err)
 
@@ -51,8 +55,8 @@ class AdminPrivilegeRepository extends BaseRepository {
     return new Promise((resolve, reject) => {
       const query = `
         SELECT p.id, p.name
-        FROM admin_privileges ap
-        JOIN privileges p ON p.id = ap.privilege_id
+        FROM ${this.tableName} ap
+        JOIN ${PrivilegeRepository.tableName} p ON p.id = ap.privilege_id
         WHERE ap.admin_id = ?;
       `
       this.db.all(query, [adminId], function (err, rows) {

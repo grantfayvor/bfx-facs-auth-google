@@ -110,10 +110,10 @@ describe('Admin Privileges', () => {
 
     await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
 
-    const hasPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, 1)
+    const hasPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, privilege.name)
     assert.deepStrictEqual(hasPrivilege, true)
 
-    const missingPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, 2)
+    const missingPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, 'INVALID:PRIVILEGE')
     assert.deepStrictEqual(missingPrivilege, false)
   })
 })

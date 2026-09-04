@@ -3,15 +3,15 @@
 const assert = require('assert')
 const BaseRepository = require('./repository')
 
-const tableName = 'privileges'
-
 class PrivilegeRepository extends BaseRepository {
+  static tableName = 'privileges'
+
   /**
    *
    * @param {import('sqlite3').Database} db
    */
   constructor (db, conf) {
-    super(db, tableName, conf)
+    super(db, PrivilegeRepository.tableName, conf)
   }
 
   /**
