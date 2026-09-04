@@ -286,7 +286,6 @@ describe('forms field', () => {
       }
     })
 
-
     it('should update whitelistedIps and return the new list from getAdmin', async () => {
       await authGoogle.addAdmin(adminWithIps)
       const adminBeforeUpdate = await authGoogle.getAdmin(testAdminEmail)

@@ -6,20 +6,19 @@ const BaseRepository = require('./repository')
 const tableName = 'admin_privileges'
 
 class AdminPrivilegeRepository extends BaseRepository {
-
   /**
-   * 
-   * @param {import('sqlite3').Database} db 
+   *
+   * @param {import('sqlite3').Database} db
    */
   constructor (db, conf) {
     super(db, tableName, conf)
   }
 
   /**
-   * 
+   *
    * @param {object} param0
-   * @param {number} param0.adminId 
-   * @param {number} param0.privilegeId 
+   * @param {number} param0.adminId
+   * @param {number} param0.privilegeId
    * @returns {Promise<{adminId, privilegeId}>}
    */
   add ({ adminId, privilegeId }) {
@@ -29,9 +28,9 @@ class AdminPrivilegeRepository extends BaseRepository {
   }
 
   /**
-   * 
-   * @param {number} adminId 
-   * @param {number} privilegeId 
+   *
+   * @param {number} adminId
+   * @param {number} privilegeId
    * @returns {Promise<object>}
    */
   findAdminPrivilege (adminId, privilegeId) {
@@ -41,7 +40,7 @@ class AdminPrivilegeRepository extends BaseRepository {
         [adminId, privilegeId],
         function (err, row) {
           if (err) return reject(err)
-          
+
           return resolve(row)
         }
       )

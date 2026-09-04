@@ -3,9 +3,7 @@
 'use strict'
 
 const assert = require('assert')
-const fs = require('fs')
-const path = require('path')
-const { omit, pick } = require('@bitfinex/lib-js-util-base')
+const { pick } = require('@bitfinex/lib-js-util-base')
 
 const conf = require('./config/facs/auth-google.config')
 const AuthGoogle = require('../')
@@ -89,13 +87,12 @@ describe('Admin Privileges', () => {
 
   it('should return an admin with their associated privileges', async () => {
     await authGoogle.addPrivilege(testPrivilege)
-    const savedAdmin = await authGoogle.addAdmin(adminPayload)
+    await authGoogle.addAdmin(adminPayload)
 
     const [privilege] = await authGoogle.getAllPrivileges()
 
     await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
-    
-    
+
     const res = await authGoogle.getAdminWithPrivileges(adminPayload.email)
     assert.deepStrictEqual(pick(res, ['email', 'level', 'active', 'privileges']), {
       email: adminPayload.email,
@@ -107,13 +104,12 @@ describe('Admin Privileges', () => {
 
   it('should check if an admin has a required privilege', async () => {
     await authGoogle.addPrivilege(testPrivilege)
-    const savedAdmin = await authGoogle.addAdmin(adminPayload)
+    await authGoogle.addAdmin(adminPayload)
 
     const [privilege] = await authGoogle.getAllPrivileges()
 
     await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
-    
-    
+
     const hasPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, 1)
     assert.deepStrictEqual(hasPrivilege, true)
 

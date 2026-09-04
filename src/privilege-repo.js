@@ -6,18 +6,17 @@ const BaseRepository = require('./repository')
 const tableName = 'privileges'
 
 class PrivilegeRepository extends BaseRepository {
-
   /**
-   * 
-   * @param {import('sqlite3').Database} db 
+   *
+   * @param {import('sqlite3').Database} db
    */
   constructor (db, conf) {
     super(db, tableName, conf)
   }
 
   /**
-   * 
-   * @param {object} param0 
+   *
+   * @param {object} param0
    * @param {string} param0.name
    * @returns {Promise<{name: string}>}
    */

@@ -3,12 +3,11 @@
 const assert = require('assert')
 
 class BaseRepository {
-
   /**
-   * 
-   * @param {import('sqlite3').Database} db 
-   * @param {string} tableName 
-   * @param {Record<string, any>} conf 
+   *
+   * @param {import('sqlite3').Database} db
+   * @param {string} tableName
+   * @param {Record<string, any>} conf
    */
   constructor (db, tableName, conf) {
     this.db = db
@@ -17,8 +16,8 @@ class BaseRepository {
   }
 
   /**
-   * 
-   * @param {object} data 
+   *
+   * @param {object} data
    */
   add (data) {
     assert.ok(this.conf.useDB, 'Cannot add repository if DB is not available')
@@ -39,7 +38,7 @@ class BaseRepository {
   }
 
   /**
-   * 
+   *
    * @returns {Promise<Array>}
    */
   findAll () {
@@ -59,8 +58,8 @@ class BaseRepository {
   }
 
   /**
-   * 
-   * @param {number} id 
+   *
+   * @param {number} id
    * @returns
    */
   findById (id) {

@@ -39,9 +39,9 @@ async function verify (password, hash) {
   })
 }
 
-function isValidDate(value) {
-  const date = new Date(value);
-  return !isNaN(date.getTime());
+function isValidDate (value) {
+  const date = new Date(value)
+  return !isNaN(date.getTime())
 }
 
 const tableName = 'admin_users'
@@ -239,7 +239,7 @@ class GoogleAuth extends DbBase {
       async () => {
         this.privilegeRepo = new PrivilegeRepository(this.db, this.conf)
         this.adminPrivilegeRepo = new AdminPrivilegeRepository(this.db, this.conf)
-      },
+      }
     ], cb)
   }
 
@@ -665,7 +665,7 @@ class GoogleAuth extends DbBase {
         assert.ok(typeof ip === 'string', 'each whitelistedIps entry should be a string')
       })
     }
-    
+
     if (!isNil(passwordResetToken)) {
       assert.ok(typeof passwordResetToken === 'string', 'passwordResetToken should be a string')
     }
@@ -964,10 +964,10 @@ class GoogleAuth extends DbBase {
   }
 
   /**
-   * 
-   * @param {string} emailOrId 
-   * @param {number} privilegeId 
-   * @returns 
+   *
+   * @param {string} emailOrId
+   * @param {number} privilegeId
+   * @returns
    */
   async assignAdminPrivilege (emailOrId, privilegeId) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
@@ -980,9 +980,9 @@ class GoogleAuth extends DbBase {
   }
 
   /**
-   * 
-   * @param {string} emailOrId 
-   * @param {number} privilegeId 
+   *
+   * @param {string} emailOrId
+   * @param {number} privilegeId
    * @returns {Boolean}
    */
   async checkAdminHasRequiredPrivilege (emailOrId, privilegeId) {
