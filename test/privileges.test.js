@@ -56,8 +56,27 @@ describe('Admin Privileges', () => {
 
     const res = await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
     assert.deepStrictEqual(res, {
-      admin_id: savedAdmin.id,
-      privilege_id: privilege.id
+      admin: savedAdmin.email,
+      privilege: privilege.name
+    })
+  })
+
+  it('should unassign privilege from admin', async () => {
+    await authGoogle.addPrivilege(testPrivilege)
+    const savedAdmin = await authGoogle.addAdmin(adminPayload)
+
+    const [privilege] = await authGoogle.getAllPrivileges()
+
+    const assigned = await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
+    assert.deepStrictEqual(assigned, {
+      admin: savedAdmin.email,
+      privilege: privilege.name
+    })
+
+    const unassigned = await authGoogle.unAssignAdminPrivilege(adminPayload.email, privilege.id)
+    assert.deepStrictEqual(unassigned, {
+      admin: savedAdmin.email,
+      privilege: privilege.name
     })
   })
 

@@ -65,6 +65,20 @@ class AdminPrivilegeRepository extends BaseRepository {
       })
     })
   }
+
+  delete (adminId, privilegeId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        DELETE FROM ${this.tableName}
+        WHERE admin_id = ?
+        AND privilege_id = ?;
+      `
+      this.db.run(query, [adminId, privilegeId], function (err, rows) {
+        if (err) return reject(err)
+        return resolve(rows)
+      })
+    })
+  }
 }
 
 module.exports = AdminPrivilegeRepository

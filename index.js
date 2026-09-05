@@ -917,12 +917,12 @@ class GoogleAuth extends DbBase {
 
   async _getAdminEmailsFromDB (active, company) {
     return new Promise((resolve, reject) => {
-      const whereClause = [['active', active && 1], ['company', company && `'${company}'`]].reduce((query, prop) => {
-        if (prop[1]) {
+      const whereClause = ['active', 'company'].reduce((query, prop) => {
+        if (prop) {
           if (query.length) {
             query += ' AND '
           }
-          query += `${prop[0]} = ${prop[1]}`
+          query += `${prop} =?`
         }
         return query
       }, '')
@@ -931,7 +931,15 @@ class GoogleAuth extends DbBase {
         ? `SELECT LOWER(email) AS email FROM ${tableName} WHERE ${whereClause} ORDER BY email ASC`
         : `SELECT LOWER(email) AS email FROM ${tableName} ORDER BY email ASC`
 
-      this.db.all(query, [], (err, rows) => {
+      const params = []
+      if (active) {
+        params.push(1)
+      }
+      if (company) {
+        params.push(`'${company}'`)
+      }
+
+      this.db.all(query, params, (err, rows) => {
         if (err) return reject(err)
         resolve((rows || []).map(row => row.email))
       })
@@ -976,7 +984,25 @@ class GoogleAuth extends DbBase {
     const privilege = await this.privilegeRepo.findById(privilegeId)
     if (!privilege) throw new Error('INVALID_PRIVILEGE_ID')
 
-    return this.adminPrivilegeRepo.add({ adminId: admin.id, privilegeId: privilege.id })
+    await this.adminPrivilegeRepo.add({ adminId: admin.id, privilegeId: privilege.id })
+    return { admin: emailOrId, privilege: privilege.name }
+  }
+
+  /**
+   *
+   * @param {string} emailOrId
+   * @param {number} privilegeId
+   * @returns
+   */
+  async unAssignAdminPrivilege (emailOrId, privilegeId) {
+    const admin = await this._getAdminFromDB(emailOrId, true, true)
+    if (!admin) throw new Error('INVALID_ADMIN')
+
+    const privilege = await this.privilegeRepo.findById(privilegeId)
+    if (!privilege) throw new Error('INVALID_PRIVILEGE_ID')
+
+    await this.adminPrivilegeRepo.delete(admin.id, privilege.id)
+    return { admin: emailOrId, privilege: privilege.name }
   }
 
   /**
