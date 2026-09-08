@@ -320,7 +320,8 @@ class GoogleAuth extends DbBase {
     const query = { username, token, ip, level, expires_at: exp }
     try {
       await this._createUniqueAndExpireDbToken(query)
-      return cb(null, { username, token, level, ...extra, expires_at: exp })
+      const privileges = await this.adminPrivilegeRepo.getAdminPrivileges(extra.id)
+      return cb(null, { username, token, level, privileges, ...extra, expires_at: exp })
     } catch (e) {
       return cb(new Error('AUTH_FAC_ADMIN_TOKEN_CREATE_ERROR'))
     }
