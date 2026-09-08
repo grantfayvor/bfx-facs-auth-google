@@ -917,27 +917,23 @@ class GoogleAuth extends DbBase {
 
   async _getAdminEmailsFromDB (active, company) {
     return new Promise((resolve, reject) => {
-      const whereClause = ['active', 'company'].reduce((query, prop) => {
-        if (prop) {
-          if (query.length) {
-            query += ' AND '
-          }
-          query += `${prop} =?`
+      let whereClause = ''
+      const params = []
+      if (active) {
+        whereClause += 'active =?'
+        params.push(1)
+      }
+      if (company) {
+        if (whereClause.length) {
+          whereClause += ' AND '
         }
-        return query
-      }, '')
+        whereClause += 'company =?'
+        params.push(company)
+      }
 
       const query = active || company
         ? `SELECT LOWER(email) AS email FROM ${tableName} WHERE ${whereClause} ORDER BY email ASC`
         : `SELECT LOWER(email) AS email FROM ${tableName} ORDER BY email ASC`
-
-      const params = []
-      if (active) {
-        params.push(1)
-      }
-      if (company) {
-        params.push(`'${company}'`)
-      }
 
       this.db.all(query, params, (err, rows) => {
         if (err) return reject(err)
@@ -1009,7 +1005,7 @@ class GoogleAuth extends DbBase {
    *
    * @param {string} emailOrId
    * @param {string} privilege
-   * @returns {Boolean}
+   * @returns {Promise<Boolean>}
    */
   async checkAdminHasRequiredPrivilege (emailOrId, privilege) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
@@ -1019,9 +1015,9 @@ class GoogleAuth extends DbBase {
     return Boolean(adminPrivilege)
   }
 
-  async getAdminWithPrivileges (email) {
-    const admin = await this.getAdmin(email)
-    if (!admin) throw new Error('INVALID_ADMIN')
+  async getAdminWithPrivileges (email, active = true, id = false) {
+    const admin = await this.getAdmin(email, active, id)
+    if (!admin) return admin
 
     const privileges = await this.adminPrivilegeRepo.getAdminPrivileges(admin.id)
 
