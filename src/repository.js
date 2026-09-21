@@ -13,6 +13,8 @@ class BaseRepository {
     this.db = db
     this.tableName = tableName
     this.conf = conf
+
+    assert.ok(this.conf.useDB, 'Cannot use repository pattern if DB is not available')
   }
 
   /**
@@ -20,14 +22,12 @@ class BaseRepository {
    * @param {object} data
    */
   add (data) {
-    assert.ok(this.conf.useDB, 'Cannot add repository if DB is not available')
-
     return new Promise((resolve, reject) => {
       const keys = Object.keys(data)
 
       this.db.run(
         `INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${Array(keys.length).fill('?').join(', ')})`,
-        keys.map(key => data[key]),
+        Object.values(data),
         function (err) {
           if (err) return reject(err)
 
@@ -42,8 +42,6 @@ class BaseRepository {
    * @returns {Promise<Array>}
    */
   findAll () {
-    assert.ok(this.conf.useDB, 'Cannot add repository if DB is not available')
-
     return new Promise((resolve, reject) => {
       this.db.all(
         `SELECT * FROM ${this.tableName}`,
@@ -63,7 +61,7 @@ class BaseRepository {
    * @returns
    */
   findById (id) {
-    assert.ok(this.conf.useDB, 'Cannot add repository if DB is not available')
+    assert.ok(this.conf.useDB, 'Cannot use repository pattern if DB is not available')
 
     return new Promise((resolve, reject) => {
       this.db.get(

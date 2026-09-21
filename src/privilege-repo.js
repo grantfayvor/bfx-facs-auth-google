@@ -9,6 +9,7 @@ class PrivilegeRepository extends BaseRepository {
   /**
    *
    * @param {import('sqlite3').Database} db
+   * @param {{useDb: boolean}} conf
    */
   constructor (db, conf) {
     super(db, PrivilegeRepository.tableName, conf)
@@ -21,8 +22,9 @@ class PrivilegeRepository extends BaseRepository {
    * @returns {Promise<{name: string}>}
    */
   add ({ name }) {
-    assert.ok(name && typeof name === 'string', 'Name is a required string')
-    return super.add({ name })
+    const trimmedName = name?.trim()
+    assert.ok(trimmedName && typeof trimmedName === 'string', 'Name is a required string')
+    return super.add({ name: trimmedName })
   }
 }
 

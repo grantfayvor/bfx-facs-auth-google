@@ -10,6 +10,7 @@ class AdminPrivilegeRepository extends BaseRepository {
   /**
    *
    * @param {import('sqlite3').Database} db
+   * @param {{useDb: boolean}} conf
    */
   constructor (db, conf) {
     super(db, AdminPrivilegeRepository.tableName, conf)
@@ -20,7 +21,7 @@ class AdminPrivilegeRepository extends BaseRepository {
    * @param {object} param0
    * @param {number} param0.adminId
    * @param {number} param0.privilegeId
-   * @returns {Promise<{adminId, privilegeId}>}
+   * @returns {Promise<{admin_id, privilege_id}>}
    */
   add ({ adminId, privilegeId }) {
     assert.ok(adminId && typeof adminId === 'number', 'Admin ID is a required Integer')
@@ -40,7 +41,8 @@ class AdminPrivilegeRepository extends BaseRepository {
         `SELECT ap.admin_id, ap.privilege_id, p.name as privilege_name
         FROM ${this.tableName} ap
         JOIN ${PrivilegeRepository.tableName} p ON p.id = ap.privilege_id
-        WHERE ap.admin_id=? AND p.name=?`,
+        WHERE ap.admin_id=? AND p.name=?
+        LIMIT 1;`,
         [adminId, privilege],
         function (err, row) {
           if (err) return reject(err)

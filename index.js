@@ -972,7 +972,7 @@ class GoogleAuth extends DbBase {
    *
    * @param {string} emailOrId
    * @param {number} privilegeId
-   * @returns
+   * @returns {Promise<{ admin: emailOrId, privilege: string }>}
    */
   async assignAdminPrivilege (emailOrId, privilegeId) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
@@ -989,7 +989,7 @@ class GoogleAuth extends DbBase {
    *
    * @param {string} emailOrId
    * @param {number} privilegeId
-   * @returns
+   * @returns {Promise<{ admin: emailOrId, privilege: string }>}
    */
   async unAssignAdminPrivilege (emailOrId, privilegeId) {
     const admin = await this._getAdminFromDB(emailOrId, true, true)
@@ -1016,6 +1016,12 @@ class GoogleAuth extends DbBase {
     return Boolean(adminPrivilege)
   }
 
+  /**
+   * @param { string } email
+   * @param { boolean } [active=true]
+   * @param { boolean } [id=false]
+   * @returns {Promise<BaseAdminT & {timestamp: Date, active: boolean, privileges: Array<{id: number, name: string}>}>}
+   */
   async getAdminWithPrivileges (email, active = true, id = false) {
     const admin = await this.getAdmin(email, active, id)
     if (!admin) return admin
