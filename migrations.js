@@ -83,6 +83,9 @@ const migrations = [
     })
   },
   (_this, cb) => {
+    _this.db.exec('PRAGMA foreign_keys = ON;', cb)
+  },
+  (_this, cb) => {
     _this.db.run(`
       CREATE TABLE ${privilegesTable} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -3,10 +3,12 @@
 'use strict'
 
 const assert = require('assert')
+const { promisify } = require('util')
 const { pick } = require('@bitfinex/lib-js-util-base')
 
 const conf = require('./config/facs/auth-google.config')
 const AuthGoogle = require('../')
+const PrivilegeRepository = require('../src/privilege-repo')
 
 const ctx = { root: './test' }
 const caller = { ctx }
@@ -134,5 +136,25 @@ describe('Admin Privileges', () => {
 
     const missingPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, 'INVALID:PRIVILEGE')
     assert.deepStrictEqual(missingPrivilege, false)
+  })
+
+  it('deleting a privilege should cascade and unassign the associated assigned privileges', async () => {
+    await authGoogle.addPrivilege(testPrivilege)
+    await authGoogle.addAdmin(adminPayload)
+
+    const [privilege] = await authGoogle.getAllPrivileges()
+
+    await authGoogle.assignAdminPrivilege(adminPayload.email, privilege.id)
+
+    const hasPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, privilege.name)
+    assert.deepStrictEqual(hasPrivilege, true)
+
+    const runSqlFn = promisify(authGoogle.db.run.bind(authGoogle.db))
+    await runSqlFn(`DELETE FROM ${PrivilegeRepository.tableName} WHERE id=?`, [privilege.id])
+
+    {
+      const hasPrivilege = await authGoogle.checkAdminHasRequiredPrivilege(adminPayload.email, privilege.name)
+      assert.deepStrictEqual(hasPrivilege, false)
+    }
   })
 })
