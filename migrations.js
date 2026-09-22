@@ -87,7 +87,7 @@ const migrations = [
   },
   (_this, cb) => {
     _this.db.run(`
-      CREATE TABLE ${privilegesTable} (
+      CREATE TABLE IF NOT EXISTS ${privilegesTable} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE
       );
@@ -95,7 +95,7 @@ const migrations = [
   },
   (_this, cb) => {
     _this.db.run(`
-      CREATE TABLE ${adminPrivilegeTable} (
+      CREATE TABLE IF NOT EXISTS ${adminPrivilegeTable} (
         admin_id INTEGER NOT NULL,
         privilege_id INTEGER NOT NULL,
 
