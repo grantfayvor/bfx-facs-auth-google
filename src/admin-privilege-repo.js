@@ -68,7 +68,7 @@ class AdminPrivilegeRepository extends BaseRepository {
     })
   }
 
-  delete (adminId, privilegeId) {
+  remove (adminId, privilegeId) {
     return new Promise((resolve, reject) => {
       const query = `
         DELETE FROM ${this.tableName}

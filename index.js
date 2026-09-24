@@ -998,7 +998,7 @@ class GoogleAuth extends DbBase {
     const privilege = await this.privilegeRepo.findById(privilegeId)
     if (!privilege) throw new Error('INVALID_PRIVILEGE_ID')
 
-    await this.adminPrivilegeRepo.delete(admin.id, privilege.id)
+    await this.adminPrivilegeRepo.remove(admin.id, privilege.id)
     return { admin: emailOrId, privilege: privilege.name }
   }
 
