@@ -20,6 +20,7 @@ class BaseRepository {
   /**
    *
    * @param {object} data
+   * @returns {Promise<data & {id: number}>}
    */
   add (data) {
     return new Promise((resolve, reject) => {
@@ -31,7 +32,7 @@ class BaseRepository {
         function (err) {
           if (err) return reject(err)
 
-          return resolve(data)
+          return resolve({ ...data, id: this.lastID })
         }
       )
     })

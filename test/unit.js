@@ -45,7 +45,8 @@ describe('forms field', () => {
   })
 
   it('should add admin and stringify forms field', async () => {
-    await authGoogle.addAdmin(testAdminWithForms)
+    const admin = await authGoogle.addAdmin(testAdminWithForms)
+    assert.strictEqual(typeof admin.id, 'number', 'admin id should be defined')
 
     await new Promise((resolve) => authGoogle.db.get('SELECT * FROM admin_users WHERE email=?', [testAdminEmail], (err, row) => {
       if (err) throw err
